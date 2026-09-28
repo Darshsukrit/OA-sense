@@ -1,0 +1,32 @@
+{
+  "name": "oa-sense",
+  "version": "1.0.0",
+  "description": "OA-Sense (GaitMatrix) - Multimodal Biomechanical Gait Analysis & Knee Osteoarthritis Early Screening Workstation",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "test": "node tests/pipeline.test.js",
+    "start": "npx serve ."
+  },
+  "keywords": [
+    "gait-analysis",
+    "knee-osteoarthritis",
+    "biomechanics",
+    "machine-learning",
+    "random-forest",
+    "gradient-boosting",
+    "signal-processing",
+    "butterworth-filter",
+    "clinical-decision-support"
+  ],
+  "author": "Darsh Sukrit",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Darshsukrit/OA-sense.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Darshsukrit/OA-sense/issues"
+  },
+  "homepage": "https://github.com/Darshsukrit/OA-sense#readme"
+}

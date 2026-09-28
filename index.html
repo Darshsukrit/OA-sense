@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAITMATRIX / OA-Sense — AI-Assisted Multimodal Gait & Osteoarthritis Risk Screening Workstation</title>
+    <meta name="description" content="Offline-first AI-assisted multimodal gait & osteoarthritis movement risk screening research prototype. Powered by pure client-side Random Forest & Gradient Boosted Trees.">
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts Preconnect for Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body class="workstation-theme">
+
+    <!-- Top Presentation Navigation Bar (Visible in Presentation Mode) -->
+    <aside id="presentation-nav-bar" class="presentation-header" style="display: none;" aria-label="Presentation Controls">
+        <div class="pres-title-group">
+            <span class="pres-badge">JUDGE DEMO MODE</span>
+            <span id="pres-slide-title" class="pres-slide-title">1. Multimodal Patient Intake & Data Acquisition</span>
+        </div>
+        <div class="pres-ctrl-group">
+            <span id="pres-slide-counter" class="pres-counter">Step 1 of 8</span>
+            <button id="btn-pres-prev" class="btn btn-secondary btn-sm" aria-label="Previous Slide">← Previous</button>
+            <button id="btn-pres-next" class="btn btn-primary btn-sm" aria-label="Next Slide">Next →</button>
+            <button id="btn-pres-exit" class="btn btn-outline btn-sm" aria-label="Exit Presentation Mode">Exit Presentation</button>
+        </div>
+    </aside>
+
+    <!-- Full Automated Demo Progress Overlay -->
+    <div id="full-demo-overlay" class="full-demo-banner" style="display: none;">
+        <div class="demo-banner-content">
+            <div class="demo-banner-header">
+                <div class="demo-pulse-indicator"></div>
+                <div class="demo-title-group">
+                    <span id="demo-step-badge" class="demo-step-badge">Executing Step 1 / 21: Session Initialization</span>
+                    <span id="demo-step-desc" class="demo-step-desc">Loading intake profile DEMO-001 with multimodal patient context</span>
+                </div>
+            </div>
+            <div class="demo-progress-track">
+                <div id="demo-progress-fill" class="demo-progress-fill" style="width: 5%;"></div>
+            </div>
+        </div>
+        <button id="btn-demo-abort" class="btn btn-danger btn-xs">Stop Demo</button>
+    </div>
+
+    <!-- Main Application Shell -->
+    <div class="app-container">
+
+        <!-- Global Sidebar Navigation -->
+        <aside class="sidebar" id="main-sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-logo-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="5" r="3"></circle>
+                        <path d="M12 8v8"></path>
+                        <path d="M9 12l3 3 3-3"></path>
+                        <path d="M8 21l4-5 4 5"></path>
+                    </svg>
+                </div>
+                <div class="brand-text-group">
+                    <h1 class="brand-title">GAITMATRIX</h1>
+                    <span class="brand-subtitle">AI Screening Intelligence</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav" aria-label="Primary Navigation">
+                <button class="nav-item active" data-view="view-overview" id="nav-overview">
+                    <span class="nav-num">01</span>
+                    <span class="nav-label">Overview</span>
+                </button>
+                <button class="nav-item" data-view="view-new-screening" id="nav-new-screening">
+                    <span class="nav-num">02</span>
+                    <span class="nav-label">New Screening</span>
+                </button>
+                <button class="nav-item" data-view="view-sensor-monitor" id="nav-sensor-monitor">
+                    <span class="nav-num">03</span>
+                    <span class="nav-label">Sensor Monitor</span>
+                </button>
+                <button class="nav-item" data-view="view-signal-processing" id="nav-signal-processing">
+                    <span class="nav-num">04</span>
+                    <span class="nav-label">Signal Processing</span>
+                </button>
+                <button class="nav-item" data-view="view-feature-engine" id="nav-feature-engine">
+                    <span class="nav-num">05</span>
+                    <span class="nav-label">Feature Engine</span>
+                </button>
+                <button class="nav-item" data-view="view-ml-lab" id="nav-ml-lab">
+                    <span class="nav-num">06</span>
+                    <span class="nav-label">ML Lab</span>
+                </button>
+                <button class="nav-item" data-view="view-inference" id="nav-inference">
+                    <span class="nav-num">07</span>
+                    <span class="nav-label">Inference</span>
+                </button>
+                <button class="nav-item" data-view="view-research" id="nav-research">
+                    <span class="nav-num">08</span>
+                    <span class="nav-label">Research & Evidence</span>
+                </button>
+                <button class="nav-item" data-view="view-screening-reports" id="nav-screening-reports">
+                    <span class="nav-num">09</span>
+                    <span class="nav-label">Screening Reports</span>
+                </button>
+                <button class="nav-item" data-view="view-privacy" id="nav-privacy">
+                    <span class="nav-num">10</span>
+                    <span class="nav-label">Data & Privacy</span>
+                </button>
+                <button class="nav-item" data-view="view-architecture" id="nav-architecture">
+                    <span class="nav-num">11</span>
+                    <span class="nav-label">System Architecture</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-actions">
+                <button id="btn-toggle-presentation" class="btn btn-outline btn-block mb-2">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h20v14H2z"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+                    Presentation Mode
+                </button>
+                <button id="btn-run-full-demo" class="btn btn-primary btn-block">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    Run Full Demo
+                </button>
+            </div>
+
+            <div class="sidebar-status-footer">
+                <div class="status-indicator-item"><span class="status-dot dot-online"></span> SYSTEM ONLINE</div>
+                <div class="status-indicator-item"><span class="status-dot dot-offline"></span> OFFLINE MODE</div>
+                <div class="status-indicator-item"><span class="status-dot dot-storage"></span> LOCAL STORAGE</div>
+                <div class="status-indicator-item"><span class="status-dot dot-model"></span> MODEL READY</div>
+            </div>
+        </aside>
+
+        <!-- Main Workstation View Area -->
+        <main class="main-content" id="main-content-area">
+
+            <!-- Global Header Bar -->
+            <header class="workstation-top-bar">
+                <div class="top-bar-left">
+                    <span class="header-badge">RESEARCH PROTOTYPE</span>
+                    <span class="header-disclaimer">SIH 2026 • AI-Assisted Multimodal Screening • Clinical Validation Required</span>
+                </div>
+                <div class="top-bar-right">
+                    <div class="quick-chip"><span class="chip-label">Active Session:</span> <strong id="top-session-id">DEMO-001</strong></div>
+                    <div class="quick-chip"><span class="chip-label">Model:</span> <strong id="top-active-model">Ensemble (RF+GB)</strong></div>
+                </div>
+            </header>
+
+            <!-- ====================================================
+                 VIEW 01: OVERVIEW
+                 ==================================================== -->
+            <section id="view-overview" class="view-panel active">
+                <div class="view-header">
+                    <div>
+                        <h2 class="view-title">GAITMATRIX / OA-Sense</h2>
+                        <p class="view-subtitle">Offline-First AI-Assisted Multimodal Gait & Osteoarthritis Risk Screening Workstation</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary btn-sm" id="btn-overview-quickstart">Quick Demo Run</button>
+                    </div>
+                </div>
+
+                <!-- Subsystem Live Readiness Matrix -->
+                <div class="system-status-grid">
+                    <div class="status-card">
+                        <div class="status-card-header"><span class="status-name">Monocular Camera</span><span class="badge badge-success">READY</span></div>
+                        <div class="status-val">30 FPS Pose Tracking</div>
+                        <div class="status-sub">2D Sagittal Landmarks (Hip, Knee, Ankle)</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-card-header"><span class="status-name">IMU Sensors</span><span class="badge badge-success">4 / 4 READY</span></div>
+                        <div class="status-val">100 Hz Triaxial</div>
+                        <div class="status-sub">Left/Right Thigh & Shank Acc + Gyro</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-card-header"><span class="status-name">FSR Plantar Arrays</span><span class="badge badge-success">8 / 8 READY</span></div>
+                        <div class="status-val">100 Hz Loading</div>
+                        <div class="status-sub">Heel, 5th Meta, 1st/2nd Meta, Hallux</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-card-header"><span class="status-name">DSP & Filters</span><span class="badge badge-success">READY</span></div>
+                        <div class="status-val">Butterworth Lowpass</div>
+                        <div class="status-sub">Zero-phase IIR @ 6.0 Hz fc</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-card-header"><span class="status-name">Edge ML Engine</span><span class="badge badge-success">LOADED</span></div>
+                        <div class="status-val">Dual Ensemble</div>
+                        <div class="status-sub">Random Forest & XGBoost-Style Trees</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-card-header"><span class="status-name">Internet Requirement</span><span class="badge badge-info">NOT REQUIRED</span></div>
+                        <div class="status-val">100% Offline Edge</div>
+                        <div class="status-sub">Zero Cloud Telemetry Transmission</div>
+                    </div>
+                </div>
+
+                <!-- Interactive Pipeline Diagram -->
+                <div class="content-card mt-4">
+                    <div class="card-header">
+                        <h3 class="card-title">Interactive End-to-End Multimodal Architecture Pipeline</h3>
+                        <span class="card-hint">Click any stage node to inspect data flow and transformations</span>
+                    </div>
+                    <div class="pipeline-diagram-wrapper">
+                        <div class="pipeline-flow">
+                            <div class="pipeline-node active" data-target-view="view-new-screening">
+                                <div class="node-icon">01</div>
+                                <div class="node-title">Patient Intake</div>
+                                <div class="node-desc">Clinical Context & Demographics</div>
+                                <div class="node-status status-ready">READY</div>
+                            </div>
+                            <div class="pipeline-connector">→</div>
+                            <div class="pipeline-node" data-target-view="view-sensor-monitor">
+                                <div class="node-icon">02</div>
+                                <div class="node-title">Data Acquisition</div>
+                                <div class="node-desc">Camera + 4 IMUs + 8 FSRs</div>
+                                <div class="node-status status-ready">READY</div>
+                            </div>
+                            <div class="pipeline-connector">→</div>
+                            <div class="pipeline-node" data-target-view="view-signal-processing">
+                                <div class="node-icon">03</div>
+                                <div class="node-title">DSP Preprocessing</div>
+                                <div class="node-desc">Calibration, Filter & Sync</div>
+                                <div class="node-status status-ready">READY</div>
+                            </div>
+                            <div class="pipeline-connector">→</div>
+                            <div class="pipeline-node" data-target-view="view-feature-engine">
+                                <div class="node-icon">04</div>
+                                <div class="node-title">Feature Extraction</div>
+                                <div class="node-desc">Kinematics & Loading Fusion</div>
+                                <div class="node-status status-ready">READY</div>
+                            </div>
+                            <div class="pipeline-connector">→</div>
+                            <div class="pipeline-node" data-target-view="view-ml-lab">
+                                <div class="node-icon">05</div>
+                                <div class="node-title">ML Classification</div>
+                                <div class="node-desc">Random Forest & Boosting</div>
+                                <div class="node-status status-ready">READY</div>
+                            </div>
+                            <div class="pipeline-connector">→</div>
+                            <div class="pipeline-node" data-target-view="view-inference">
+                                <div class="node-icon">06</div>
+                                <div class="node-title">Decision Layer</div>
+                                <div class="node-desc">Screening Risk & Attribution</div>
+                                <div class="node-status status-ready">READY</div>
+                            </div>
+                            <div class="pipeline-connector">→</div>
+                            <div class="pipeline-node" data-target-view="view-screening-reports">
+                                <div class="node-icon">07</div>
+                                <div class="node-title">Screening Report</div>
+                                <div class="node-desc">Referral Support Document</div>
+                                <div class="node-status status-ready">READY</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scientific Integrity Notice -->
+                <div class="alert-box alert-warning mt-4">
+                    <div class="alert-icon">⚠️</div>
+                    <div class="alert-content">
+                        <strong>Scientific & Clinical Boundary Statement:</strong>
+                        OA-Sense is an experimental AI-assisted movement screening research prototype designed to identify altered gait kinematics and support clinical referral. 
+                        <strong>It is NOT a diagnostic system and does not establish medical diagnosis.</strong> Controlled movement restriction serves as engineering stress testing and is not confirmed osteoarthritis.
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ====================================================
+                 VIEW 02: NEW SCREENING
+                 ==================================================== -->
+            <section id="view-new-screening" class="view-panel">
+                <div class="view-header">
+                    <div>
+                        <h2 class="view-title">New Patient Intake & Session Configuration</h2>
+                        <p class="view-subtitle">Collect pseudonymous patient context and configure multimodal acquisition parameters</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-2">
+                    <!-- Intake Form -->
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h3 class="card-title">Pseudonymous Intake Questionnaire</h3>
+                            <span class="badge badge-info">Zero Direct PII</span>
+                        </div>
+                        <form id="intake-form" class="form-grid">
+                            <div class="form-group">
+                                <label for="intake-session-id">Session Identifier</label>
+                                <input type="text" id="intake-session-id" value="DEMO-001" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="intake-age">Age (years)</label>
+                                <input type="number" id="intake-age" value="56" min="18" max="95" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="intake-sex">Biological Sex</label>
+                                <select id="intake-sex" class="form-control">
+                                    <option value="Female" selected>Female</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="intake-height">Height (cm)</label>
+                                <input type="number" id="intake-height" value="165" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="intake-weight">Weight (kg)</label>
+                                <input type="number" id="intake-weight" value="74" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="intake-pain">Reported Knee Pain (0–10 Numeric Rating)</label>
+                                <input type="range" id="intake-pain" min="0" max="10" value="6" class="form-range">
+                                <div class="range-val"><span id="val-pain">6</span> / 10 (Moderate Pain)</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="intake-stiffness">Morning Joint Stiffness (0–10)</label>
+                                <input type="range" id="intake-stiffness" min="0" max="10" value="5" class="form-range">
+                                <div class="range-val"><span id="val-stiffness">5</span> / 10</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="intake-walking">Walking Difficulty (0–10)</label>
+                                <input type="range" id="intake-walking" min="0" max="10" value="5" class="form-range">
+                                <div class="range-val"><span id="val-walking">5</span> / 10</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="intake-stairs">Stair Climbing Difficulty (0–10)</label>
+                                <input type="range" id="intake-stairs" min="0" max="10" value="6" class="form-range">
+                                <div class="range-val"><span id="val-stairs">6</span> / 10</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="intake-injury">Prior Knee Injury / Arthroscopy</label>
+                                <select id="intake-injury" class="form-control">
+                                    <option value="No">No Previous Major Trauma</option>
+                                    <option value="Yes" selected>Yes (Prior Meniscus / Ligament Injury)</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-span-2">
+                                <label for="intake-pattern">Simulated Biomechanical Gait Profile (Demo)</label>
+                                <select id="intake-pattern" class="form-control">
+                                    <option value="normal">Normal Symmetrical Movement Profile</option>
+                                    <option value="mild_asymmetric">Mild Kinematic & Plantar Asymmetry</option>
+                                    <option value="restricted_flexion" selected>Restricted Flexion & Antalgic Offloading (Elevated Risk Pattern)</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-span-2 mt-2">
+                                <button type="button" id="btn-start-screening" class="btn btn-primary btn-lg btn-block">
+                                    ▶ Start Multimodal Screening Session
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Hardware & Intake Context Information -->
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h3 class="card-title">Edge Device Hardware Mapping</h3>
+                        </div>
+                        <div class="hardware-mapping-list">
+                            <div class="hw-item">
+                                <div class="hw-icon">📷</div>
+                                <div class="hw-details">
+                                    <strong>Lateral Monocular Camera (30 FPS)</strong>
+                                    <p>Tracks sagittal plane landmarks (Hip, Knee, Ankle, Foot) to measure gross flexion angles and step timing.</p>
+                                </div>
+                            </div>
+                            <div class="hw-item">
+                                <div class="hw-icon">⚡</div>
+                                <div class="hw-details">
+                                    <strong>4 Wearable 6-DOF IMUs (100 Hz)</strong>
+                                    <p>Mounted bilaterally on Left/Right Thigh and Shank to compute relative orientation $Q_{rel} = Q_{thigh}^{-1} \times Q_{shank}$ and angular velocities.</p>
+                                </div>
+                            </div>
+                            <div class="hw-item">
+                                <div class="hw-icon">🦶</div>
+                                <div class="hw-details">
+                                    <strong>8 Plantar FSR Insole Sensors (100 Hz)</strong>
+                                    <p>Bilateral 4-zone force resistive sensors (Heel, 5th Meta, 1st/2nd Meta, Hallux) for relative loading and COP proxy.</p>
+                                </div>
+                            </div>
+                            <div class="hw-item">
+                                <div class="hw-icon">🧠</div>
+                                <div class="hw-details">
+                                    <strong>Raspberry Pi / Edge Microprocessor</strong>
+                                    <p>Executes local Butterworth digital filtering, gait cycle segmentation, feature fusion, and real-time tree inference.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="info-callout mt-3">
+                            <strong>Privacy Guarantee:</strong> Pseudonymous session ID only. Biometric telemetry and patient questionnaire data remain isolated on the edge device.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ====================================================
+                 VIEW 03: SENSOR MONITOR
+                 ==================================================== -->
+            <section id="view-sensor-monitor" class="view-panel">
+                <div class="view-header">
+                    <div>
+                        <h2 class="view-title">Real-Time Sensor Hardware Monitor</h2>
+                        <p class="view-subtitle">Live hardware-to-software bridge: Camera pose, 4 IMUs, and 8-channel FSR insole arrays</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary btn-sm" id="btn-reacquire-signals">Regenerate Signals</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-3">
+                    <!-- Camera Skeleton Stream -->
+                    <div class="content-card col-span-1">
+                        <div class="card-header">
+                            <h3 class="card-title">Lateral Camera Stream</h3>
+                            <span class="badge badge-warning">Simulated Stream</span>
+                        </div>
+                        <div class="canvas-container">
+                            <canvas id="canvas-camera-skeleton" width="340" height="290"></canvas>
+                        </div>
+                        <div class="telemetry-bar mt-2">
+                            <div class="telemetry-item"><span class="t-label">Pose Conf:</span> <strong id="cam-telemetry-conf">96.4%</strong></div>
+                            <div class="telemetry-item"><span class="t-label">Frames:</span> <strong id="cam-telemetry-frames">420</strong></div>
+                            <div class="telemetry-item"><span class="t-label">Gait Cycles:</span> <strong id="cam-telemetry-cycles">5</strong></div>
+                        </div>
+                    </div>
+
+                    <!-- IMU 4-Channel Waveforms -->
+                    <div class="content-card col-span-2">
+                        <div class="card-header">
+                            <h3 class="card-title">4 IMUs — Triaxial Inertial Kinematics (100 Hz)</h3>
+                            <span class="badge badge-success">4/4 Synchronized</span>
+                        </div>
+                        <div class="imu-signal-grid">
+                            <div class="signal-box">
+                                <div class="signal-title">Left Shank Gyroscope (Z-Pitch)</div>
+                                <canvas id="canvas-imu-l-shank" class="signal-canvas" width="320" height="100"></canvas>
+                            </div>
+                            <div class="signal-box">
+                                <div class="signal-title">Right Shank Gyroscope (Z-Pitch)</div>
+                                <canvas id="canvas-imu-r-shank" class="signal-canvas" width="320" height="100"></canvas>
+                            </div>
+                            <div class="signal-box">
+                                <div class="signal-title">Left Thigh Accelerometer (Vertical Y)</div>
+                                <canvas id="canvas-imu-l-thigh" class="signal-canvas" width="320" height="100"></canvas>
+                            </div>
+                            <div class="signal-box">
+                                <div class="signal-title">Right Thigh Accelerometer (Vertical Y)</div>
+                                <canvas id="canvas-imu-r-thigh" class="signal-canvas" width="320" height="100"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FSR 8-Sensor Plantar Loading Section -->
+                <div class="content-card mt-4">
+                    <div class="card-header">
+                        <h3 class="card-title">8-Channel FSR Plantar Insole Arrays — Relative Loading & COP Proxy</h3>
+                        <span class="card-hint">Calculates relative plantar load distribution and asymmetry (Not absolute pressure in kPa)</span>
+                    </div>
+                    <div class="grid grid-2">
+                        <!-- Left Foot Insole -->
+                        <div class="insole-panel">
+                            <h4 class="insole-title">LEFT FOOT PLANTAR LOADING</h4>
+                            <div class="fsr-bar-group">
+                                <div class="fsr-row"><span class="fsr-label">Hallux (Great Toe)</span><div class="progress-track"><div id="fsr-bar-l-hallux" class="progress-fill" style="width: 72%;"></div></div><span id="fsr-val-l-hallux" class="fsr-num">0.72</span></div>
+                                <div class="fsr-row"><span class="fsr-label">1st/2nd Metatarsal</span><div class="progress-track"><div id="fsr-bar-l-meta12" class="progress-fill" style="width: 65%;"></div></div><span id="fsr-val-l-meta12" class="fsr-num">0.65</span></div>
+                                <div class="fsr-row"><span class="fsr-label">5th Metatarsal (Lateral)</span><div class="progress-track"><div id="fsr-bar-l-meta5" class="progress-fill" style="width: 58%;"></div></div><span id="fsr-val-l-meta5" class="fsr-num">0.58</span></div>
+                                <div class="fsr-row"><span class="fsr-label">Heel (Initial Contact)</span><div class="progress-track"><div id="fsr-bar-l-heel" class="progress-fill" style="width: 88%;"></div></div><span id="fsr-val-l-heel" class="fsr-num">0.88</span></div>
+                            </div>
+                        </div>
+                        <!-- Right Foot Insole -->
+                        <div class="insole-panel">
+                            <h4 class="insole-title">RIGHT FOOT PLANTAR LOADING</h4>
+                            <div class="fsr-bar-group">
+                                <div class="fsr-row"><span class="fsr-label">Hallux (Great Toe)</span><div class="progress-track"><div id="fsr-bar-r-hallux" class="progress-fill" style="width: 80%;"></div></div><span id="fsr-val-r-hallux" class="fsr-num">0.80</span></div>
+                                <div class="fsr-row"><span class="fsr-label">1st/2nd Metatarsal</span><div class="progress-track"><div id="fsr-bar-r-meta12" class="progress-fill" style="width: 78%;"></div></div><span id="fsr-val-r-meta12" class="fsr-num">0.78</span></div>
+                                <div class="fsr-row"><span class="fsr-label">5th Metatarsal (Lateral)</span><div class="progress-track"><div id="fsr-bar-r-meta5" class="progress-fill" style="width: 70%;"></div></div><span id="fsr-val-r-meta5" class="fsr-num">0.70</span></div>
+                                <div class="fsr-row"><span class="fsr-label">Heel (Initial Contact)</span><div class="progress-track"><div id="fsr-bar-r-heel" class="progress-fill" style="width: 92%;"></div></div><span id="fsr-val-r-heel" class="fsr-num">0.92</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ====================================================
+                 VIEW 04: SIGNAL PROCESSING
+                 ==================================================== -->
+            <section id="view-signal-processing" class="view-panel">
+                <div class="view-header">
+                    <div>
+                        <h2 class="view-title">Digital Signal Processing & Gait Segmentation</h2>
+                        <p class="view-subtitle">Interactive 6-stage transformation: Raw signals to conditioned, synchronized gait cycles</p>
+                    </div>
+                </div>
+
+                <!-- 6-Stage DSP Flow -->
+                <div class="dsp-pipeline-tabs">
+                    <button class="dsp-tab active" data-dsp-stage="stage-raw">1. Raw Signals</button>
+                    <button class="dsp-tab" data-dsp-stage="stage-calibration">2. Calibration & Tare</button>
+                    <button class="dsp-tab" data-dsp-stage="stage-filtering">3. Butterworth Lowpass</button>
+                    <button class="dsp-tab" data-dsp-stage="stage-sync">4. Master Synchronization</button>
+                    <button class="dsp-tab" data-dsp-stage="stage-quality">5. Missing Data & QA</button>
+                    <button class="dsp-tab" data-dsp-stage="stage-segmentation">6. Gait Segmentation</button>
+                </div>
+
+                <!-- DSP Stage Detail Container -->
+                <div id="dsp-stage-content" class="content-card mt-3">
+                    <div id="dsp-detail-body">
+                        <!-- Populated dynamically by UI engine -->
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ====================================================
+                 VIEW 05: FEATURE ENGINE
+                 ==================================================== -->
+            <section id="view-feature-engine" class="view-panel">
+                <div class="view-header">
+                    <div>
+                        <h2 class="view-title">Feature Extraction Engine</h2>
+                        <p class="view-subtitle">Raw sensor signals are converted into interpretable numerical movement features</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-primary btn-sm" id="btn-extract-features">⚡ Generate Multimodal Feature Vector</button>
+                    </div>
+                </div>
+
+                <!-- 4 Feature Modality Groups -->
+                <div class="grid grid-2">
+                    <!-- Modality 1: Camera Pose -->
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h3 class="card-title">1. Camera / Computer Vision Kinematics</h3>
+                            <span class="badge badge-info">2D Sagittal</span>
+                        </div>
+                        <table class="data-table">
+                            <tbody>
+                                <tr><td>Knee Flexion Excursion</td><td id="feat-cam-knee"><strong class="highlight-val">48.2°</strong></td></tr>
+                                <tr><td>Hip Joint Excursion</td><td id="feat-cam-hip">38.5°</td></tr>
+                                <tr><td>Cadence</td><td id="feat-cam-cadence">94.0 steps/min</td></tr>
+                                <tr><td>Step Timing Duration</td><td id="feat-cam-timing">0.55 s</td></tr>
+                                <tr><td>Trunk Posture Lean</td><td id="feat-cam-posture">4.2°</td></tr>
+                                <tr><td>Bilateral Symmetry Ratio</td><td id="feat-cam-symm">0.86</td></tr>
+                            </tbody>
+                        </table>
+                        <div class="footnote mt-2">Note: Metric step distance requires appropriate camera/scene calibration.</div>
+                    </div>
+
+                    <!-- Modality 2: IMU Kinematics -->
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h3 class="card-title">2. Wearable IMU Relative Orientation</h3>
+                            <span class="badge badge-info">Quaternion Kinematics</span>
+                        </div>
+                        <div class="formula-box mb-2">
+                            <code>Q_relative = inverse(Q_thigh) × Q_shank</code>
+                        </div>
+                        <table class="data-table">
+                            <tbody>
+                                <tr><td>Knee Range of Motion (ROM)</td><td id="feat-imu-rom"><strong class="highlight-val">46.5°</strong></td></tr>
+                                <tr><td>Peak Shank Angular Velocity</td><td id="feat-imu-vel">224.8°/s</td></tr>
+                                <tr><td>Kinematic Gait Asymmetry</td><td id="feat-imu-asym"><strong class="highlight-val">0.142</strong></td></tr>
+                                <tr><td>Sagittal Stance Phase Ratio</td><td id="feat-imu-stance">62.4%</td></tr>
+                                <tr><td>Coordinate Convention</td><td>Sagittal Z-Pitch, Anatomical Flexion</td></tr>
+                            </tbody>
+                        </table>
+                        <div class="footnote mt-2">Knee angle depends on sensor attachment, anatomical axis alignment, and drift mitigation.</div>
+                    </div>
+
+                    <!-- Modality 3: FSR Plantar Loading -->
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h3 class="card-title">3. FSR Relative Plantar Loading</h3>
+                            <span class="badge badge-info">Plantar Distribution</span>
+                        </div>
+                        <table class="data-table">
+                            <tbody>
+                                <tr><td>Relative Heel Loading Ratio</td><td id="feat-fsr-heel">0.584</td></tr>
+                                <tr><td>Relative Forefoot Loading Ratio</td><td id="feat-fsr-forefoot">0.416</td></tr>
+                                <tr><td>Plantar Loading Asymmetry</td><td id="feat-fsr-asym"><strong class="highlight-val">0.182</strong></td></tr>
+                                <tr><td>Center of Pressure (COP) Proxy</td><td id="feat-fsr-cop">-0.168 (AP Axis)</td></tr>
+                                <tr><td>Stance Contact Duration</td><td id="feat-fsr-contact">0.68 s</td></tr>
+                            </tbody>
+                        </table>
+                        <div class="footnote mt-2">Relative plantar loading and COP proxy. Not absolute pressure in kPa.</div>
+                    </div>
+
+                    <!-- Modality 4: Patient Clinical Context -->
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h3 class="card-title">4. Patient Clinical & Symptom Context</h3>
+                            <span class="badge badge-info">Intake Survey</span>
+                        </div>
+                        <table class="data-table">
+                            <tbody>
+                                <tr><td>Patient Age</td><td id="feat-ctx-age">56 years</td></tr>
+                                <tr><td>Reported Joint Pain (0-10)</td><td id="feat-ctx-pain">6 / 10</td></tr>
+                                <tr><td>Morning Stiffness Level (0-10)</td><td id="feat-ctx-stiffness">5 / 10</td></tr>
+                                <tr><td>Walking Difficulty (0-10)</td><td id="feat-ctx-walk">5 / 10</td></tr>
+                                <tr><td>Calculated Body Mass Index (BMI)</td><td id="feat-ctx-bmi">27.2 kg/m²</td></tr>
+                                <tr><td>Prior Knee Trauma</td><td id="feat-ctx-injury">Yes</td></tr>
+                            </tbody>
+                        </table>
+                        <div class="footnote mt-2">Contextual information is not a diagnosis.</div>
+                    </div>
+                </div>
+
+                <!-- Combined Multimodal Feature Vector Table -->
+                <div class="content-card mt-4">
+                    <div class="card-header">
+                        <h3 class="card-title">Standardized Multimodal Feature Vector (Model Input Tensor)</h3>
+                        <span class="badge badge-success">12-Dimensional Vector</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table text-mono" id="feature-vector-table">
+                            <thead>
+                                <tr>
+                                    <th>age</th><th>pain</th><th>stiffness</th><th>knee_rom</th>
+                                    <th>knee_velocity</th><th>cadence</th><th>gait_asymmetry</th>
+                                    <th>loading_asymmetry</th><th>heel_loading</th><th>forefoot_loading</th>
+                                    <th>step_timing</th><th>posture_lean</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr id="feature-vector-row">
+                                    <td>56</td><td>6.0</td><td>5.0</td><td>46.5</td>
+                                    <td>224.8</td><td>94.0</td><td>0.142</td><td>0.182</td>
+                                    <td>0.584</td><td>0.416</td><td>0.55</td><td>4.2</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ====================================================
+                 VIEW 06: ML LAB
+                 ==================================================== -->
+            <section id="view-ml-lab" class="view-panel">
+                <div class="view-header">
+                    <div>
+                        <h2 class="view-title">Model Training & Validation Lab</h2>
+                        <p class="view-subtitle">Pure client-side Random Forest & XGBoost-Style Gradient Boosting with participant-level splitting</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary btn-sm" id="btn-regen-dataset">Regenerate Dataset</button>
+                        <button class="btn btn-primary btn-sm" id="btn-train-all-models">⚡ Train Models & Evaluate</button>
+                    </div>
+                </div>
+
+                <!-- Warning Banner -->
+                <div class="alert-box alert-warning mb-3">
+                    <div class="alert-icon">⚠️</div>
+                    <div class="alert-content">
+                        <strong>DEMO / SYNTHETIC DEMONSTRATION DATA:</strong>
+                        This prototype demonstrates the offline ML pipeline. Clinical deployment requires a properly labelled clinical dataset and defined reference standard.
+                    </div>
+                </div>
+
+                <!-- Dataset Metadata & Participant Split -->
+                <div class="grid grid-3">
+                    <div class="content-card">
+                        <div class="card-header"><h3 class="card-title">Research Dataset</h3></div>
+                        <div class="stat-number" id="ds-total-samples">350</div>
+                        <div class="stat-desc">Total Multi-Trial Gait Samples (50 Distinct Subjects)</div>
+                        <div class="mt-2 text-sm text-muted">Classes: LOW (133), MODERATE (119), ELEVATED (98)</div>
+                    </div>
+                    <div class="content-card">
+                        <div class="card-header"><h3 class="card-title">Participant-Level Split</h3></div>
+                        <div class="split-bar-group mt-2">
+                            <div class="split-bar-track">
+                                <div class="split-fill train-fill" style="width: 70%;" title="Train: 70% (35 Subjects, 245 Samples)">70% Train</div>
+                                <div class="split-fill val-fill" style="width: 15%;" title="Validation: 15% (7 Subjects, 49 Samples)">15% Val</div>
+                                <div class="split-fill test-fill" style="width: 15%;" title="Test: 15% (8 Subjects, 56 Samples)">15% Test</div>
+                            </div>
+                        </div>
+                        <div class="badge badge-success mt-2">STRICTLY NO PARTICIPANT OVERLAP (0 Data Leakage)</div>
+                    </div>
+                    <div class="content-card">
+                        <div class="card-header"><h3 class="card-title">Data Quality Check</h3></div>
+                        <div id="ml-qa-status" class="badge badge-success mb-2">PASS (100% Validated)</div>
+                        <div class="text-xs text-muted">0 Missing Values • Physiological Bounds Checked • Unique Trial IDs</div>
+                    </div>
+                </div>
+
+                <!-- Training & Model Execution Panel -->
+                <div class="grid grid-2 mt-4">
+                    <!-- Random Forest Training Card -->
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h3 class="card-title">1. Random Forest Classifier</h3>
+                            <span id="rf-status-badge" class="badge badge-success">TRAINED</span>
+                        </div>
+                        <div class="text-sm text-muted mb-2">
+                            Ensemble of 25 Decision Trees with bootstrap bagging & Gini impurity feature subsampling ($mtry = \sqrt{p}$).
+                        </div>
+                        <div class="training-stats-grid">
+                            <div class="t-stat"><span>Trees:</span> <strong>25</strong></div>
+                            <div class="t-stat"><span>Max Depth:</span> <strong>6</strong></div>
+                            <div class="t-stat"><span>Features:</span> <strong>12</strong></div>
+                            <div class="t-stat"><span>Test Accuracy:</span> <strong id="rf-metric-acc">--</strong></div>
+                        </div>
+                        <div class="mt-3">
+                            <button id="btn-train-rf" class="btn btn-secondary btn-sm btn-block">Train Random Forest</button>
+                        </div>
+                    </div>
+
+                    <!-- XGBoost-Style Boosting Training Card -->
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h3 class="card-title">2. XGBoost-Style Gradient Boosting</h3>
+                            <span id="gb-status-badge" class="badge badge-success">TRAINED</span>
+                        </div>
+                        <div class="text-sm text-muted mb-2">
+                            Sequential weak regression trees fit to multi-class Softmax pseudo-residuals with learning rate shrinkage ($\eta = 0.1$).
+                        </div>
+                        <div class="canvas-container mb-2">
+                            <canvas id="canvas-loss-curve" width="340" height="90"></canvas>
+                        </div>
+                        <div class="training-stats-grid">
+                            <div class="t-stat"><span>Estimators:</span> <strong>20</strong></div>
+                            <div class="t-stat"><span>Learning Rate:</span> <strong>0.10</strong></div>
+                            <div class="t-stat"><span>Loss:</span> <strong id="gb-metric-loss">0.184</strong></div>
+                            <div class="t-stat"><span>Test Accuracy:</span> <strong id="gb-metric-acc">--</strong></div>
+                        </div>
+                        <div class="mt-3">
+                            <button id="btn-train-gb" class="btn btn-secondary btn-sm btn-block">Train Gradient Boosting</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Model Comparison & Confusion Matrix -->
+                <div class="content-card mt-4">
+                    <div class="card-header">
+                        <h3 class="card-title">Holdout Participant Test Evaluation (Demo Validation)</h3>
+                        <span class="footnote">Computed on holdout subjects — NOT clinical accuracy</span>
+                    </div>
+
+                    <div class="grid grid-2">
+                        <!-- Metrics Comparison Table -->
+                        <div>
+                            <h4 class="subcard-title">Performance Metrics Comparison</h4>
+                            <table class="data-table text-mono" id="model-comparison-table">
+                                <thead>
+                                    <tr>
+                                        <th>Metric (Holdout Test)</th>
+                                        <th>Random Forest</th>
+                                        <th>XGBoost-Style</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>Test Accuracy</td><td id="comp-rf-acc">--</td><td id="comp-gb-acc">--</td></tr>
+                                    <tr><td>Macro Precision</td><td id="comp-rf-prec">--</td><td id="comp-gb-prec">--</td></tr>
+                                    <tr><td>Macro Recall / Sens.</td><td id="comp-rf-rec">--</td><td id="comp-gb-rec">--</td></tr>
+                                    <tr><td>Macro Specificity</td><td id="comp-rf-spec">--</td><td id="comp-gb-spec">--</td></tr>
+                                    <tr><td>Macro F1-Score</td><td id="comp-rf-f1">--</td><td id="comp-gb-f1">--</td></tr>
+                                    <tr><td>Weighted F1-Score</td><td id="comp-rf-wf1">--</td><td id="comp-gb-wf1">--</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Confusion Matrix Container -->
+                        <div>
+                            <h4 class="subcard-title">Holdout Confusion Matrix (Ensemble Model)</h4>
+                            <div id="confusion-matrix-container">
+                                <!-- Rendered dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Model Selection & Registry -->
+                <div class="content-card mt-4">
+                    <div class="card-header">
+                        <h3 class="card-title">Model Registry & Active Inference Dispatcher</h3>
+                    </div>
+                    <div class="model-select-group">
+                        <label class="model-radio-card">
+                            <input type="radio" name="model-select" value="randomForest">
+                            <div class="radio-card-content">
+                                <strong>Random Forest (v0.1-demo)</strong>
+                                <span>Bagged Decision Trees baseline</span>
+                            </div>
+                        </label>
+                        <label class="model-radio-card">
+                            <input type="radio" name="model-select" value="gradientBoosting">
+                            <div class="radio-card-content">
+                                <strong>XGBoost-Style Boosting (v0.1-demo)</strong>
+                                <span>Sequential pseudo-residual trees</span>
+                            </div>
+                        </label>
+                        <label class="model-radio-card active">
+                            <input type="radio" name="model-select" value="ensemble" checked>
+                            <div class="radio-card-content">
+                                <strong>Dual-Model Ensemble (Recommended)</strong>
+                                <span>Softmax probability blending (0.5 RF + 0.5 GB)</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ====================================================
+                 VIEW 07: INFERENCE & EXPLAINABILITY
+                 ==================================================== -->
+            <section id="view-inference" class="view-panel">
+                <div class="view-header">
+                    <div>
+                        <h2 class="view-title">Real-Time Edge Inference & Explainability</h2>
+                        <p class="view-subtitle">Execute dual-model inference on patient feature vector and attribute contributing kinematic factors</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-primary btn-sm" id="btn-run-inference">⚡ Execute Model Inference</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-3">
+                    <!-- Final Decision Layer -->
+                    <div class="content-card col-span-1">
+                        <div class="card-header">
+                            <h3 class="card-title">Screening Output</h3>
+                            <span class="badge badge-info">Model Output</span>
+                        </div>
+                        <div class="decision-result-box text-center">
+                            <div class="screening-tier-label">SCREENING CATEGORY</div>
+                            <div id="infer-decision-badge" class="screening-tier-badge tier-elevated">ELEVATED</div>
+                            <div class="screening-conf-val">Model Confidence: <strong id="infer-confidence-val">88.4%</strong></div>
+                            <div class="active-model-tag" id="infer-active-model-name">Dual Softmax Ensemble (RF+GB)</div>
+                        </div>
+
+                        <div class="prob-distribution-group mt-3">
+                            <h4 class="subcard-title">Class Probability Distribution</h4>
+                            <div class="prob-row"><span class="p-label">LOW</span><div class="p-track"><div id="prob-bar-low" class="p-fill fill-low" style="width: 5%;"></div></div><span id="prob-val-low" class="p-val">0.05</span></div>
+                            <div class="prob-row"><span class="p-label">MODERATE</span><div class="p-track"><div id="prob-bar-mod" class="p-fill fill-mod" style="width: 25%;"></div></div><span id="prob-val-mod" class="p-val">0.25</span></div>
+                            <div class="prob-row"><span class="p-label">ELEVATED</span><div class="p-track"><div id="prob-bar-ele" class="p-fill fill-ele" style="width: 70%;"></div></div><span id="prob-val-ele" class="p-val">0.70</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Dual Model Side-by-Side Comparison -->
+                    <div class="content-card col-span-2">
+                        <div class="card-header">
+                            <h3 class="card-title">Dual Model Comparison Breakdown</h3>
+                        </div>
+                        <div class="grid grid-2">
+                            <div class="model-breakdown-card">
+                                <h4 class="subcard-title">Random Forest Classifier</h4>
+                                <div class="mb-2">Output: <strong id="infer-rf-category" class="text-warning">ELEVATED</strong></div>
+                                <div class="text-xs text-muted">Probabilities: [Low: <span id="infer-rf-p0">0.08</span>, Mod: <span id="infer-rf-p1">0.24</span>, Ele: <span id="infer-rf-p2">0.68</span>]</div>
+                            </div>
+                            <div class="model-breakdown-card">
+                                <h4 class="subcard-title">XGBoost-Style Gradient Boosting</h4>
+                                <div class="mb-2">Output: <strong id="infer-gb-category" class="text-warning">ELEVATED</strong></div>
+                                <div class="text-xs text-muted">Probabilities: [Low: <span id="infer-gb-p0">0.02</span>, Mod: <span id="infer-gb-p1">0.26</span>, Ele: <span id="infer-gb-p2">0.72</span>]</div>
+                            </div>
+                        </div>
+
+                        <!-- Explainability Horizontal Bars -->
+                        <div class="mt-4">
+                            <div class="card-header">
+                                <h4 class="subcard-title">Why Did the Model Flag This Pattern? (Feature Contribution)</h4>
+                            </div>
+                            <div id="feature-attribution-container" class="attribution-bars-container">
+                                <!-- Populated dynamically -->
+                            </div>
+                            <div class="footnote mt-2">
+                                Feature importance indicates statistical model contribution to the screening category, NOT medical causation.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ====================================================
+                 VIEW 08: RESEARCH & EVIDENCE
+                 ==================================================== -->
+            <section id="view-research" class="view-panel">
+                <div class="view-header">
+                    <div>
+                        <h2 class="view-title">Research Evidence & Literature Base</h2>
+                        <p class="view-subtitle">Scientific foundation, published peer-reviewed citations, and explicit evidence boundaries</p>
+                    </div>
+                </div>
+
+                <!-- Insights: What Research Supports vs Does Not Prove -->
+                <div class="grid grid-2 mb-4">
+                    <div class="content-card border-left-success">
+                        <div class="card-header"><h3 class="card-title text-success">✓ What Published Research Supports</h3></div>
+                        <ul class="evidence-list" id="research-supports-list">
+                            <!-- Populated dynamically from research.js -->
+                        </ul>
+                    </div>
+                    <div class="content-card border-left-warning">
+                        <div class="card-header"><h3 class="card-title text-warning">✗ What Research Does NOT Prove</h3></div>
+                        <ul class="evidence-list" id="research-notprove-list">
+                            <!-- Populated dynamically from research.js -->
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Comprehensive Studies Library -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3 class="card-title">Literature Citation Library (11 Studies)</h3>
+                        <span class="badge badge-secondary">All numbers represent published studies — NOT OA-Sense proprietary accuracy</span>
+                    </div>
+                    <div class="studies-grid" id="research-studies-grid">
+                        <!-- Populated dynamically from research.js -->
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ====================================================
+                 VIEW 09: SCREENING REPORTS
+                 ==================================================== -->
+            <section id="view-screening-reports" class="view-panel">
+                <div class="view-header no-print">
+                    <div>
+                        <h2 class="view-title">AI-Assisted Screening Report</h2>
+                        <p class="view-subtitle">Structured clinical referral decision support document</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary btn-sm" id="btn-save-report">💾 Save to Local Storage</button>
+                        <button class="btn btn-primary btn-sm" id="btn-print-report">🖨️ Print / Export PDF</button>
+                    </div>
+                </div>
+
+                <!-- Printable Report Sheet -->
+                <div class="printable-report-sheet" id="printable-report-container">
+                    <div class="report-header-banner">
+                        <div class="report-brand">
+                            <h2 class="report-title">GAITMATRIX</h2>
+                            <div class="report-subtitle">AI-ASSISTED MULTIMODAL GAIT SCREENING REPORT</div>
+                        </div>
+                        <div class="report-meta">
+                            <div><strong>Session:</strong> <span id="rep-session-id">DEMO-001</span></div>
+                            <div><strong>Date:</strong> <span id="rep-date">2026-09-21</span></div>
+                            <div><strong>Model:</strong> <span id="rep-model-version">Ensemble v0.1</span></div>
+                        </div>
+                    </div>
+
+                    <div class="report-result-section">
+                        <div class="report-result-box">
+                            <div class="rep-label">SCREENING CATEGORY</div>
+                            <div id="rep-category-badge" class="rep-category-badge risk-elevated">ELEVATED MOVEMENT RISK</div>
+                            <div class="rep-conf">Confidence Score: <strong id="rep-conf-score">88.4%</strong></div>
+                        </div>
+                        <div class="report-referral-box">
+                            <div class="rep-referral-title">REFERRAL DECISION SUPPORT GUIDANCE</div>
+                            <p id="rep-referral-text" class="rep-referral-text">
+                                Consider clinical musculoskeletal evaluation based on symptoms and screening findings. Observed kinematic asymmetry and reduced sagittal joint excursions suggest further clinical follow-up may be appropriate.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="report-grid mt-3">
+                        <div class="report-col">
+                            <h4 class="report-subheading">Observed Kinematic & Plantar Markers</h4>
+                            <table class="report-table">
+                                <tbody>
+                                    <tr><td>Knee Range of Motion (ROM)</td><td id="rep-m-rom">46.5° (Reduced)</td></tr>
+                                    <tr><td>Peak Shank Angular Velocity</td><td id="rep-m-vel">224.8°/s</td></tr>
+                                    <tr><td>Kinematic Gait Asymmetry</td><td id="rep-m-asym">14.2% (Marked)</td></tr>
+                                    <tr><td>Plantar Loading Asymmetry</td><td id="rep-m-loadasym">18.2% (Marked)</td></tr>
+                                    <tr><td>Relative Heel Loading Ratio</td><td id="rep-m-heel">58.4%</td></tr>
+                                    <tr><td>Cadence</td><td id="rep-m-cadence">94.0 steps/min</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="report-col">
+                            <h4 class="report-subheading">Patient Context & Functional Status</h4>
+                            <table class="report-table">
+                                <tbody>
+                                    <tr><td>Age / Sex</td><td id="rep-p-age">56 / Female</td></tr>
+                                    <tr><td>Reported Pain Score (0-10)</td><td id="rep-p-pain">6 / 10</td></tr>
+                                    <tr><td>Morning Stiffness</td><td id="rep-p-stiffness">5 / 10</td></tr>
+                                    <tr><td>Walking / Stair Difficulty</td><td id="rep-p-diff">5 / 6</td></tr>
+                                    <tr><td>Body Mass Index (BMI)</td><td id="rep-p-bmi">27.2 kg/m²</td></tr>
+                                    <tr><td>Prior Joint Trauma</td><td id="rep-p-injury">Yes</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="report-disclaimer-box mt-3">
+                        <strong>RESEARCH PROTOTYPE DISCLAIMER:</strong> This report is generated by an offline AI research prototype for clinical screening referral support. It is NOT a medical diagnosis and does not substitute for clinical examination or diagnostic radiography.
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ====================================================
+                 VIEW 10: DATA & PRIVACY
+                 ==================================================== -->
+            <section id="view-privacy" class="view-panel">
+                <div class="view-header">
+                    <div>
+                        <h2 class="view-title">Data Privacy & Local-First Architecture</h2>
+                        <p class="view-subtitle">Offline edge processing, data minimization, and pseudonymous storage management</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-2">
+                    <div class="content-card">
+                        <div class="card-header"><h3 class="card-title">Local-First Privacy Architecture</h3></div>
+                        <div class="privacy-flow-diagram">
+                            <div class="p-step">PATIENT</div>
+                            <div class="p-arrow">↓</div>
+                            <div class="p-step">LOCAL SENSORS (IMU / FSR / CAMERA)</div>
+                            <div class="p-arrow">↓</div>
+                            <div class="p-step">LOCAL EDGE PROCESSING (DSP)</div>
+                            <div class="p-arrow">↓</div>
+                            <div class="p-step">LOCAL TREE INFERENCE (RF / GB)</div>
+                            <div class="p-arrow">↓</div>
+                            <div class="p-step">LOCAL STORAGE & REPORT</div>
+                        </div>
+                        <div class="info-callout mt-3">
+                            <strong>Zero Cloud Dependency:</strong> All processing is executed client-side. No patient telemetry is sent across the internet.
+                        </div>
+                    </div>
+
+                    <div class="content-card">
+                        <div class="card-header">
+                            <h3 class="card-title">Saved Screening Sessions</h3>
+                            <button id="btn-clear-sessions" class="btn btn-outline btn-xs">Clear History</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table text-sm" id="saved-sessions-table">
+                                <thead>
+                                    <tr><th>Session ID</th><th>Date/Time</th><th>Category</th><th>Confidence</th></tr>
+                                </thead>
+                                <tbody id="saved-sessions-body">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="footnote mt-2">
+                            LocalStorage is used for demonstration only. Production deployment requires encrypted local SQLite database (SQLCipher) and role-based access control.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- ====================================================
+                 VIEW 11: SYSTEM ARCHITECTURE & ROADMAP
+                 ==================================================== -->
+            <section id="view-architecture" class="view-panel">
+                <div class="view-header">
+                    <div>
+                        <h2 class="view-title">System Architecture & Validation Roadmap</h2>
+                        <p class="view-subtitle">5-Stage Engineering-to-Clinical roadmap and hardware deployment specification</p>
+                    </div>
+                </div>
+
+                <!-- 5-Stage Roadmap -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3 class="card-title">5-Stage Validation Framework</h3>
+                        <span class="badge badge-warning">Current Status: Stage 3 (Proxy Testing)</span>
+                    </div>
+                    <div class="stages-timeline" id="validation-stages-container">
+                        <!-- Populated dynamically from validation.js -->
+                    </div>
+                </div>
+
+                <!-- Limitations -->
+                <div class="content-card mt-4">
+                    <div class="card-header"><h3 class="card-title">System Limitations & Biomechanical Confounders</h3></div>
+                    <div class="grid grid-3" id="validation-limitations-container">
+                        <!-- Populated dynamically from validation.js -->
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Application Orchestrator Script -->
+    <script type="module" src="app.js"></script>
+</body>
+</html>
